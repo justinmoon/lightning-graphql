@@ -23,14 +23,29 @@ class Invoice(graphene.ObjectType):
     description = graphene.String()
 
 
+
+
 class Query(graphene.ObjectType):
 
-    all_invoices = graphene.List(Invoice)
+    all_invoices = graphene.List(Invoice, 
+            maxSat=graphene.Int(),
+            minSat=graphene.Int(),
+            status=graphene.String())
 
-    def resolve_all_invoices(self, info):
+    def resolve_all_invoices(self, info, maxSat=None, minSat=None,
+            status=None):
         invoices = cl.listinvoices()['invoices']
-        invoices = [Invoice(**invoice) for invoice in invoices]
-        return invoices
+
+        if maxSat:
+            invoices = [i for i in invoices if i['msatoshi'] < maxSat]
+        if minSat:
+            invoices = [i for i in invoices if i['msatoshi'] > minSat]
+        if status:
+            invoices = [i for i in invoices if i['status'] == status]
+
+        print(invoices)
+        return [Invoice(**invoice) for invoice in invoices]
+
 
 class CreateInvoice(graphene.Mutation):
     class Arguments:
@@ -51,11 +66,11 @@ class CreateInvoice(graphene.Mutation):
         return CreateInvoice(invoice=invoice, ok=ok)
 
 
-class MyMutations(graphene.ObjectType):
+class Mutations(graphene.ObjectType):
     create_invoice = CreateInvoice.Field()
 
 
-schema = graphene.Schema(query=Query, mutation=MyMutations)
+schema = graphene.Schema(query=Query, mutation=Mutations)
 query = """
     query queryInvoices {
       allInvoices {
