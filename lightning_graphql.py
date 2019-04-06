@@ -32,8 +32,30 @@ class Query(graphene.ObjectType):
         invoices = [Invoice(**invoice) for invoice in invoices]
         return invoices
 
+class CreateInvoice(graphene.Mutation):
+    class Arguments:
+        msatoshi = graphene.Int()
+        label = graphene.String()
+        description = graphene.String()
 
-schema = graphene.Schema(query=Query)
+    ok = graphene.Boolean()
+    invoice = graphene.Field(lambda: Invoice)
+
+    def mutate(self, info, msatoshi, label, description):
+        print("cl.invoice() args: ", msatoshi, label, description)
+        cl_invoice = cl.invoice(msatoshi, label, description)
+        invoices = cl.listinvoices(label)['invoices']
+        assert len(invoices) == 1
+        ok = True
+        invoice = Invoice(**invoices[0])
+        return CreateInvoice(invoice=invoice, ok=ok)
+
+
+class MyMutations(graphene.ObjectType):
+    create_invoice = CreateInvoice.Field()
+
+
+schema = graphene.Schema(query=Query, mutation=MyMutations)
 query = """
     query queryInvoices {
       allInvoices {
@@ -56,11 +78,6 @@ query = """
 
 def test_query():
     result = schema.execute(query)
-    return result
-
-
-if __name__ == "__main__":
-    result = schema.execute(query)
     if result.errors:
         print(f"Errors: {result.errors}")
     if result.data:
@@ -70,3 +87,31 @@ if __name__ == "__main__":
     else:
         print('No results')
 
+def test_mutation():
+    # FIXME: doesn't work
+    mutation = """
+    mutation myFirstMutation($label: String!) {
+        createInvoice(msatoshi: 50000, description: "#reckless", label: $label) {
+            invoice {
+                msatoshi
+                label
+                description
+            }
+            ok
+        }
+    }
+    """
+    import uuid
+    label = str(uuid.uuid4())
+    args = {"label": label}
+    return schema.execute(mutation, **args)
+
+
+if __name__ == "__main__":
+
+    # result = test_mutation()
+
+    test_query()
+
+    # print('Errors:', result.errors)
+    # print('Data:', result.data)
