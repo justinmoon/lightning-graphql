@@ -1,6 +1,7 @@
+import sys
+
 from flask import Flask
 from flask_graphql import GraphQLView
-
 from lightning_graphql import schema
 
 app = Flask(__name__)
@@ -16,4 +17,4 @@ app.add_url_rule(
 )
 
 if __name__ == '__main__':
-    app.run(port=9000)
+    app.run(port=sys.argv[1])

@@ -1,3 +1,4 @@
+import sys
 import config
 import graphene
 import lightning
@@ -5,7 +6,7 @@ import lightning
 from pprint import pprint
 
 
-cl = lightning.LightningRpc(config.CLIGHTNING_SOCKET)
+cl = lightning.LightningRpc(sys.argv[2])
 
 
 class Invoice(graphene.ObjectType):
