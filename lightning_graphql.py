@@ -10,6 +10,7 @@ cl = lightning.LightningRpc(sys.argv[2])
 
 
 class Invoice(graphene.ObjectType):
+    id = graphene.String()
     label = graphene.String()
     bolt11 = graphene.String()
     payment_hash = graphene.String()
@@ -17,13 +18,19 @@ class Invoice(graphene.ObjectType):
     msatoshi = graphene.Int()
     amount_msat = graphene.String()
     msatoshi_received = graphene.Int()
+    amount_sent_msat = graphene.String()
+    msatoshi_sent = graphene.Int()
     amount_received_msat = graphene.String()
     status = graphene.String()
     paid_at = graphene.Int()
     expires_at = graphene.Int()
+    created_at = graphene.Int()
+    expiry = graphene.Int()
     description = graphene.String()
-
-
+    payment_preimage = graphene.String()
+    destination = graphene.String()
+    # WTF
+    warning_capacity = graphene.String()
 
 
 class Query(graphene.ObjectType):
@@ -57,17 +64,32 @@ class CreateInvoice(graphene.Mutation):
     invoice = graphene.Field(lambda: Invoice)
 
     def mutate(self, info, msatoshi, label, description):
-        print("cl.invoice() args: ", msatoshi, label, description)
         cl_invoice = cl.invoice(msatoshi, label, description)
-        invoices = cl.listinvoices(label)['invoices']
-        assert len(invoices) == 1
+        # FIXME: should we look invoice up to get more fields?
+        # invoices = cl.listinvoices(label)['invoices']
+        # assert len(invoices) == 1
+        # invoice = Invoice(**invoices[0])
+        invoice = Invoice(**cl_invoice)
         ok = True
-        invoice = Invoice(**invoices[0])
         return CreateInvoice(invoice=invoice, ok=ok)
+
+
+class PayInvoice(graphene.Mutation):
+    class Arguments:
+        bolt11 = graphene.String()
+
+    ok = graphene.Boolean()
+    invoice = graphene.Field(lambda: Invoice)
+
+    def mutate(self, info, bolt11):
+        result = cl.pay(bolt11)
+        ok = True
+        return PayInvoice(ok=ok, invoice=Invoice(**result))
 
 
 class Mutations(graphene.ObjectType):
     create_invoice = CreateInvoice.Field()
+    pay_invoice = PayInvoice.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutations)
