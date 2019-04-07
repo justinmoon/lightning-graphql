@@ -44,7 +44,6 @@ class Query(graphene.ObjectType):
         if status:
             invoices = [i for i in invoices if i['status'] == status]
 
-        print(invoices)
         return [Invoice(**invoice) for invoice in invoices]
 
 
@@ -72,62 +71,3 @@ class Mutations(graphene.ObjectType):
 
 
 schema = graphene.Schema(query=Query, mutation=Mutations)
-query = """
-    query queryInvoices {
-      allInvoices {
-        label
-        bolt11
-        paymentHash
-        payIndex
-        msatoshi
-        amountMsat
-        msatoshiReceived
-        amountReceivedMsat
-        status
-        paidAt
-        expiresAt
-        description
-      }
-    }
-"""
-
-
-def test_query():
-    result = schema.execute(query)
-    if result.errors:
-        print(f"Errors: {result.errors}")
-    if result.data:
-        invoices = result.data['allInvoices']
-        print(f"First invoice (of {len(invoices)}):")
-        pprint(invoices[0])
-    else:
-        print('No results')
-
-def test_mutation():
-    # FIXME: doesn't work
-    mutation = """
-    mutation myFirstMutation($label: String!) {
-        createInvoice(msatoshi: 50000, description: "#reckless", label: $label) {
-            invoice {
-                msatoshi
-                label
-                description
-            }
-            ok
-        }
-    }
-    """
-    import uuid
-    label = str(uuid.uuid4())
-    args = {"label": label}
-    return schema.execute(mutation, **args)
-
-
-if __name__ == "__main__":
-
-    # result = test_mutation()
-
-    test_query()
-
-    # print('Errors:', result.errors)
-    # print('Data:', result.data)
