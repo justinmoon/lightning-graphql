@@ -36,6 +36,8 @@ Visit [http://127.0.0.1:5000/graphql](http://127.0.0.1:5000/graphql) in your pro
 
 ##### List invoices
 
+![image](images/queryInvoices.png)
+
 ```
 query queryInvoices {
   allInvoices {
@@ -57,6 +59,10 @@ query queryInvoices {
 
 ##### List invoices w/ parameters
 
+Parameters are defined in the "Query Parameters" in the bottom-left window in screenshot below.
+
+![image](images/queryInvoicesParams.png)
+
 ```
 query queryInvoicesParams($status: String) {
   allInvoices (status:$status) {
@@ -76,6 +82,9 @@ query queryInvoicesParams($status: String) {
 ```
 
 ##### Create Invoice
+
+![image](images/createInvoice.png)
+
 
 ```
 mutation createInvoiceMutation($msatoshi: Int!, $description: String!) {
@@ -101,6 +110,8 @@ mutation createInvoiceMutation($msatoshi: Int!, $description: String!) {
 
 ##### Pay Invoice
 
+![image](images/payInvoice.png)
+
 ```
 mutation payInvoiceMutation($bolt11: String!) {
   payInvoice(bolt11:$bolt11) {
@@ -108,4 +119,3 @@ mutation payInvoiceMutation($bolt11: String!) {
   }
 }
 ```
-
