@@ -6,7 +6,7 @@ import lightning
 from pprint import pprint
 
 
-cl = lightning.LightningRpc(sys.argv[2])
+cl = lightning.LightningRpc(sys.argv[1])
 
 
 class Invoice(graphene.ObjectType):
