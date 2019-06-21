@@ -21,7 +21,7 @@ Some helpers to fill your dev environment will some nodes, channels, and invoice
 - Have lnet-random make some invoices: `node activity.js`
 python3 -m venv venv
 source venv/bin/activate
-pip instal -r requirements.txt
+pip install -r requirements.txt
 ```
 
 ### Running Examples
